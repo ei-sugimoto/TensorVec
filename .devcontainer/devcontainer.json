@@ -1,0 +1,17 @@
+{
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "nvidia.nsight-vscode-edition"
+            ],
+            "settings": {
+                "editor.defaultFormatter": "ms-vscode.cpptools",
+                "editor.formatOnSave": true
+            }
+        }
+    }
+}
