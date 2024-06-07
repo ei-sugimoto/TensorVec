@@ -172,7 +172,7 @@ void print_matrix(const int &m, const int &n, const float *A, const int &lda)
     {
         for (int j = 0; j < n; j++)
         {
-            std::printf("%0.2f ", A[j * lda + i]);
+            std::printf("%0.2f ", A[i * lda + j]);
         }
         std::printf("\n");
     }
@@ -185,7 +185,7 @@ void print_matrix(const int &m, const int &n, const double *A, const int &lda)
     {
         for (int j = 0; j < n; j++)
         {
-            std::printf("%0.2f ", A[j * lda + i]);
+            std::printf("%0.2f ", A[j + i * lda]);
         }
         std::printf("\n");
     }

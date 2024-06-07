@@ -1,14 +1,3 @@
-#include <iostream>
-#include <vector>
-#include <cuda.h>
-#include <cublas_v2.h>
-#include <cuda_runtime.h>
-
-#include "cutlass/cutlass.h"
-#include "cutlass/layout/matrix.h"
-#include "cutlass/gemm/device/gemm.h"
-#include "gemv/gemv.cuh"
-
 #define ll long long
 #define loop(i, n) for (ll i = 0; i < n; i++)
 
@@ -23,7 +12,7 @@ using namespace std;
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
-#include "utils/cublas_utils.h"
+#include "../utils/cublas_utils.h"
 
 using data_type = double;
 
@@ -60,7 +49,7 @@ int main(int argc, char *argv[])
 
     loop(i, n)
     {
-        x.at(i) = i + 1;
+        x.at(i) = i;
     }
 
     data_type *d_A = nullptr;
