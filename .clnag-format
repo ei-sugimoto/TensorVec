@@ -46,7 +46,7 @@ IncludeBlocks: Preserve
 IndentCaseLabels: false
 
 # インデント
-IndentWidth: 2
+IndentWidth: 1
 
 # ポインターの"*"、"&"は変数宣言の左に記述する
 PointerAlignment: Right
