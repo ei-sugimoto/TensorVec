@@ -10,7 +10,7 @@
 #include "gemv/gemv.cuh"
 
 #define ll long long
-#define roop(i, n) for (ll i = 0; i < n; i++)
+#define loop(i, n) for (ll i = 0; i < n; i++)
 
 typedef float typeM;
 typedef float typeV;
@@ -32,8 +32,8 @@ int main(int argc, char *argv[])
     cublasHandle_t cublasH = NULL;
     cudaStream_t stream = NULL;
 
-    const int m = 2;
-    const int n = 2;
+    const int m = 8;
+    const int n = 8;
     const int lda = m;
 
     /*
@@ -42,13 +42,26 @@ int main(int argc, char *argv[])
      *   x = | 5.0 6.0 |
      */
 
-    const std::vector<data_type> A = {1.0, 3.0, 2.0, 4.0};
-    const std::vector<data_type> x = {5.0, 6.0};
+    std::vector<data_type> A(m * n, 0); // サイズを m*n に設定し、全要素を0で初期化
+    std::vector<data_type> x(n, 0);     // サイズを n に設定し、全要素を0で初期化
     std::vector<data_type> y(m, 0);
     const data_type alpha = 1.0;
     const data_type beta = 0.0;
     const int incx = 1;
     const int incy = 1;
+
+    loop(i, m)
+    {
+        loop(j, n)
+        {
+            A[i * m + j] = i * n + j;
+        }
+    }
+
+    loop(i, n)
+    {
+        x.at(i) = i + 1;
+    }
 
     data_type *d_A = nullptr;
     data_type *d_x = nullptr;
