@@ -1,6 +1,7 @@
 #define ll long long
 #define loop(i, n) for (ll i = 0; i < n; i++)
 #define space() cout << "===============================================" << endl
+#define if
 
 typedef float typeM;
 typedef float typeV;
@@ -15,10 +16,12 @@ using namespace std;
 #include <iostream>
 #include "../utils/print_matrix.h"
 #include "mm_gpu80.cuh"
+#include "../utils/timer.hpp"
 
 int main()
 {
-    const int m = 8;
+    const int m = 32;
+    class Timer timer;
 
     typeM *deviceM, *M;
     typeV *deviceV, *deviceRes, *V, *res;
@@ -53,7 +56,11 @@ int main()
 
     cudaMemcpy(deviceM, M, sizeof(typeM) * m * m, cudaMemcpyHostToDevice);
     cudaMemcpy(deviceV, V, sizeof(typeV) * m * m, cudaMemcpyHostToDevice);
+    timer.reset();
     mm_gpu<typeM, typeV>(m, m, m, 1.0f, deviceM, deviceV, 1.0f, deviceRes);
+    timer.stop();
+    space();
+    timer.print();
 
     cudaMemcpy(res, deviceRes, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
 
