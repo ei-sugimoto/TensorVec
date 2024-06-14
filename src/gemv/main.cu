@@ -1,7 +1,6 @@
 #define ll long long
 #define loop(i, n) for (ll i = 0; i < n; i++)
 #define space() cout << "===============================================" << endl
-#define if
 
 typedef float typeM;
 typedef float typeV;
@@ -20,6 +19,8 @@ using namespace std;
 
 int main()
 {
+    bool isPrint = true;
+    const int thresholdMatrixSize = 16;
     const int m = 32;
     class Timer timer;
 
@@ -29,6 +30,16 @@ int main()
     M = (typeM *)malloc(sizeof(typeM) * m * m);
     V = (typeV *)malloc(sizeof(typeV) * m * m);
     res = (typeV *)malloc(sizeof(typeV) * m * m);
+
+    if (m < thresholdMatrixSize)
+    {
+        isPrint = true;
+    }
+    else
+    {
+        isPrint = false;
+    }
+
     loop(i, m)
     {
         loop(j, m)
@@ -36,8 +47,12 @@ int main()
             M[i * m + j] = i * m + j;
         }
     }
-    space();
-    print_matrix(m, m, M, m);
+    if (isPrint)
+    {
+        space();
+
+        print_matrix(m, m, M, m);
+    }
 
     loop(i, m)
     {
@@ -46,9 +61,13 @@ int main()
             V[i + j * m] = j;
         }
     }
-    space();
 
-    print_matrix(m, m, V, m);
+    if (isPrint)
+    {
+        space();
+
+        print_matrix(m, m, V, m);
+    }
 
     cudaMalloc((void **)&deviceM, sizeof(typeM) * m * m);
     cudaMalloc((void **)&deviceV, sizeof(typeV) * m * m);
@@ -64,7 +83,11 @@ int main()
 
     cudaMemcpy(res, deviceRes, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
 
-    space();
-    print_matrix(m, m, res, m);
+    if (isPrint)
+    {
+        space();
+
+        print_matrix(m, m, res, m);
+    }
     return 0;
 }
