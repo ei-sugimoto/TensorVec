@@ -14,7 +14,7 @@ using namespace std;
 
 #include <iostream>
 #include "../utils/print_matrix.h"
-#include "mm_gpu80.h"
+#include "mm_gpu80.cuh"
 
 int main()
 {
