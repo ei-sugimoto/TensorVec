@@ -10,7 +10,18 @@ __global__ void create_matrix(T *matrix, int rows, int cols)
 }
 
 template <typename T>
-__global__ void create_vector(T *vector, int rows, int cols)
+__global__ void create_vector(T *vector, int size)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx < size)
+    {
+        vector[idx] = (T)(idx);
+    }
+}
+
+template <typename T>
+__global__ void create_vector_for_cutlass(T *vector, int rows, int cols)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;

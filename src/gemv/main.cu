@@ -46,7 +46,7 @@ int main()
     cudaMalloc((void **)&deviceRes, sizeof(typeV) * m * m);
 
     create_matrix<typeM><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceM, m, m);
-    create_vector<typeV><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceV, m, m);
+    create_vector_for_cutlass<typeV><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceV, m, m);
 
     cudaMemcpy(M, deviceM, sizeof(typeM) * m * m, cudaMemcpyDeviceToHost);
     cudaMemcpy(V, deviceV, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);

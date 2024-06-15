@@ -15,6 +15,7 @@ using namespace std;
 
 #include "../utils/cublas_utils.h"
 #include "../utils/timer.hpp"
+#include "../utils/operate_matrix.cuh"
 
 using data_type = double;
 
@@ -25,8 +26,8 @@ int main(int argc, char *argv[])
     bool isPrint = true;
     const int thresholdMatrixSize = 16;
 
-    const int m = 128;
-    const int n = 128;
+    const int m = 8;
+    const int n = 8;
     const int lda = m;
     Timer timer;
 
@@ -47,24 +48,18 @@ int main(int argc, char *argv[])
         isPrint = false;
     }
 
-    loop(i, m)
-    {
-        loop(j, n)
-        {
-            A[i * m + j] = i * n + j;
-        }
-    }
-
-    loop(i, n)
-    {
-        x.at(i) = i;
-    }
-
     data_type *d_A = nullptr;
     data_type *d_x = nullptr;
     data_type *d_y = nullptr;
 
-    cublasOperation_t transa = CUBLAS_OP_N;
+    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_A), sizeof(data_type) * A.size()));
+    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_x), sizeof(data_type) * x.size()));
+    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_y), sizeof(data_type) * y.size()));
+
+    create_matrix<data_type><<<dim3((m + 16 - 1) / 16, (n + 16 - 1) / 16), dim3(16, 16)>>>(d_A, m, n);
+    create_vector<data_type><<<dim3((n + 16 - 1) / 16, (1 + 16 - 1) / 16), dim3(16, 16)>>>(d_x, n);
+    CUDA_CHECK(cudaMemcpy(A.data(), d_A, sizeof(data_type) * A.size(), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(x.data(), d_x, sizeof(data_type) * x.size(), cudaMemcpyDeviceToHost));
 
     if (isPrint)
     {
@@ -83,19 +78,10 @@ int main(int argc, char *argv[])
     }
 
     CUBLAS_CHECK(cublasCreate(&cublasH));
+    cublasOperation_t transa = CUBLAS_OP_T;
 
     CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
     CUBLAS_CHECK(cublasSetStream(cublasH, stream));
-
-    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_A), sizeof(data_type) * A.size()));
-    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_x), sizeof(data_type) * x.size()));
-    CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_y), sizeof(data_type) * y.size()));
-
-    CUDA_CHECK(cudaMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), cudaMemcpyHostToDevice,
-                               stream));
-    CUDA_CHECK(cudaMemcpyAsync(d_x, x.data(), sizeof(data_type) * x.size(), cudaMemcpyHostToDevice,
-                               stream));
-
     timer.reset();
     CUBLAS_CHECK(
         cublasDgemv(cublasH, transa, m, n, &alpha, d_A, lda, d_x, incx, &beta, d_y, incy));
