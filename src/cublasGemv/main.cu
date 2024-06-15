@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
     bool isPrint = true;
     const int thresholdMatrixSize = 16;
 
-    const int m = 32;
-    const int n = 32;
+    const int m = 128;
+    const int n = 128;
     const int lda = m;
     Timer timer;
 

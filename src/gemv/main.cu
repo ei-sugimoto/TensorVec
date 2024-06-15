@@ -16,12 +16,13 @@ using namespace std;
 #include "../utils/print_matrix.h"
 #include "mm_gpu80.cuh"
 #include "../utils/timer.hpp"
+#include "../utils/operate_matrix.cuh"
 
 int main()
 {
     bool isPrint = true;
     const int thresholdMatrixSize = 16;
-    const int m = 32;
+    const int m = 8;
     class Timer timer;
 
     typeM *deviceM, *M;
@@ -40,41 +41,23 @@ int main()
         isPrint = false;
     }
 
-    loop(i, m)
-    {
-        loop(j, m)
-        {
-            M[i * m + j] = i * m + j;
-        }
-    }
-    if (isPrint)
-    {
-        space();
-
-        print_matrix(m, m, M, m);
-    }
-
-    loop(i, m)
-    {
-        loop(j, m)
-        {
-            V[i + j * m] = j;
-        }
-    }
-
-    if (isPrint)
-    {
-        space();
-
-        print_matrix(m, m, V, m);
-    }
-
     cudaMalloc((void **)&deviceM, sizeof(typeM) * m * m);
     cudaMalloc((void **)&deviceV, sizeof(typeV) * m * m);
     cudaMalloc((void **)&deviceRes, sizeof(typeV) * m * m);
 
-    cudaMemcpy(deviceM, M, sizeof(typeM) * m * m, cudaMemcpyHostToDevice);
-    cudaMemcpy(deviceV, V, sizeof(typeV) * m * m, cudaMemcpyHostToDevice);
+    create_matrix<typeM><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceM, m, m);
+    create_vector<typeV><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceV, m, m);
+
+    cudaMemcpy(M, deviceM, sizeof(typeM) * m * m, cudaMemcpyDeviceToHost);
+    cudaMemcpy(V, deviceV, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
+
+    if (isPrint)
+    {
+        print_matrix(m, m, M, m);
+        space();
+        print_matrix(m, m, V, m);
+    }
+
     timer.reset();
     mm_gpu<typeM, typeV>(m, m, m, 1.0f, deviceM, deviceV, 1.0f, deviceRes);
     timer.stop();
