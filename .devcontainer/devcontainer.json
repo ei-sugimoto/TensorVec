@@ -6,7 +6,9 @@
         "vscode": {
             "extensions": [
                 "ms-vscode.cpptools",
-                "nvidia.nsight-vscode-edition"
+                "nvidia.nsight-vscode-edition",
+                "yzhang.markdown-all-in-one",
+                "shd101wyy.markdown-preview-enhanced"
             ],
             "settings": {
                 "editor.defaultFormatter": "ms-vscode.cpptools",
