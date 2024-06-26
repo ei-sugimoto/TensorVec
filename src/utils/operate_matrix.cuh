@@ -28,7 +28,7 @@ __global__ void create_vector_for_cutlass(T *vector, int rows, int cols)
 
     if (idx < rows && idy < cols)
     {
-        vector[idy * cols + idx] = (T)(idy);
+        vector[idy * cols + idx] = (T)(idx);
     }
 }
 
@@ -41,4 +41,13 @@ __global__ void clear_matrix(T *matrix, int rows, int cols)
     {
         matrix[idy * cols + idx] = 0;
     }
+}
+template <typename T>
+void print_vector(const int &m, const T *A)
+{
+    for (int i = 0; i < m; i++)
+    {
+        std::printf("%0.2f ", A[i]);
+    }
+    std::printf("\n");
 }

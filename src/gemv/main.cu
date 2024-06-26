@@ -18,6 +18,8 @@ using namespace std;
 #include "../utils/timer.hpp"
 #include "../utils/operate_matrix.cuh"
 
+const int VECTOR_COL_SIZE = 2;
+
 int main()
 {
     bool isPrint = true;
@@ -29,7 +31,7 @@ int main()
     typeV *deviceV, *deviceRes, *V, *res;
 
     M = (typeM *)malloc(sizeof(typeM) * m * m);
-    V = (typeV *)malloc(sizeof(typeV) * m * m);
+    V = (typeV *)malloc(sizeof(typeV) * m * VECTOR_COL_SIZE);
     res = (typeV *)malloc(sizeof(typeV) * m * m);
 
     if (m < thresholdMatrixSize)
@@ -42,35 +44,39 @@ int main()
     }
 
     cudaMalloc((void **)&deviceM, sizeof(typeM) * m * m);
-    cudaMalloc((void **)&deviceV, sizeof(typeV) * m * m);
-    cudaMalloc((void **)&deviceRes, sizeof(typeV) * m * m);
+    cudaMalloc((void **)&deviceV, sizeof(typeV) * m * VECTOR_COL_SIZE);
+    cudaMalloc((void **)&deviceRes, sizeof(typeV) * m * VECTOR_COL_SIZE);
 
     create_matrix<typeM><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceM, m, m);
-    create_vector_for_cutlass<typeV><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceV, m, m);
+    create_vector_for_cutlass<typeV><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceV, m, 1);
 
     cudaMemcpy(M, deviceM, sizeof(typeM) * m * m, cudaMemcpyDeviceToHost);
-    cudaMemcpy(V, deviceV, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
+    cudaMemcpy(V, deviceV, sizeof(typeV) * m * VECTOR_COL_SIZE, cudaMemcpyDeviceToHost);
 
     if (isPrint)
     {
         print_matrix(m, m, M, m);
         space();
-        print_matrix(m, m, V, m);
+        print_vector<typeV>(m, V);
     }
 
-    timer.reset();
-    mm_gpu<typeM, typeV>(m, m, m, 1.0f, deviceM, deviceV, 1.0f, deviceRes);
-    timer.stop();
-    space();
-    timer.print();
+    // timer.reset();
+    // mm_gpu<typeM, typeV>(m, m, m, 1.0f, deviceM, deviceV, 1.0f, deviceRes);
+    // cudaDeviceSynchronize();
+    // timer.stop();
 
-    cudaMemcpy(res, deviceRes, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
+    // space();
+    // cout << "m : " << m << endl;
+    // timer.print();
+    // space();
 
-    if (isPrint)
-    {
-        space();
+    // cudaMemcpy(res, deviceRes, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
 
-        print_matrix(m, m, res, m);
-    }
+    // if (isPrint)
+    // {
+    //     space();
+
+    //     print_matrix(m, m, res, m);
+    // }
     return 0;
 }

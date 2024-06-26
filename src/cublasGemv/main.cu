@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
     bool isPrint = true;
     const int thresholdMatrixSize = 16;
 
-    const int m = 8;
-    const int n = 8;
+    const int m = 4352;
+    const int n = 4352;
     const int lda = m;
     Timer timer;
 
@@ -85,8 +85,11 @@ int main(int argc, char *argv[])
     timer.reset();
     CUBLAS_CHECK(
         cublasDgemv(cublasH, transa, m, n, &alpha, d_A, lda, d_x, incx, &beta, d_y, incy));
+    cudaDeviceSynchronize();
+
     timer.stop();
     space();
+    cout << "m : " << m << endl;
     timer.print();
     space();
 
