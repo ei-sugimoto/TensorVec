@@ -3,6 +3,8 @@
 #include "cutlass/cutlass.h"
 #include "cutlass/layout/matrix.h"
 #include "cutlass/gemm/device/gemm.h"
+#include <string>
+#include "../utils/print_status.cuh"
 
 #include <iostream>
 #include <vector>
@@ -51,6 +53,11 @@ void mm_gpu(int m, int n, int k, ElementC alpha, const ElementAB *d_A, const Ele
         {d_C, ldc},   // Tensor-ref for destination matrix D (may be different memory than source C matrix)
         {alpha, beta} // Scalars used in the Epilogue
     });
+    if (status != cutlass::Status::kSuccess)
+    {
+        std::cout << CutlassStatusToString(status) << std::endl;
+    }
+
     assert(status == cutlass::Status::kSuccess);
 }
 
@@ -82,6 +89,11 @@ void mm_gpu(int m, int n, int k, cutlass::half_t alpha, const cutlass::half_t *d
         {d_C, ldc},   // Tensor-ref for destination matrix D (may be different memory than source C matrix)
         {alpha, beta} // Scalars used in the Epilogue
     });
+
+    if (status != cutlass::Status::kSuccess)
+    {
+        std::cout << CutlassStatusToString(status) << std::endl;
+    }
     assert(status == cutlass::Status::kSuccess);
 }
 
@@ -113,5 +125,10 @@ void mm_gpu(int m, int n, int k, float alpha, const cutlass::half_t *d_A, const 
         {d_C, ldc},   // Tensor-ref for destination matrix D (may be different memory than source C matrix)
         {alpha, beta} // Scalars used in the Epilogue
     });
+
+    if (status != cutlass::Status::kSuccess)
+    {
+        std::cout << CutlassStatusToString(status) << std::endl;
+    }
     assert(status == cutlass::Status::kSuccess);
 }
