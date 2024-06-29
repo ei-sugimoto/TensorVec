@@ -18,65 +18,72 @@ using namespace std;
 #include "../utils/timer.hpp"
 #include "../utils/operate_matrix.cuh"
 
-const int VECTOR_COL_SIZE = 2;
-
 int main()
 {
-    bool isPrint = true;
-    const int thresholdMatrixSize = 16;
-    const int m = 8;
-    class Timer timer;
-
-    typeM *deviceM, *M;
-    typeV *deviceV, *deviceRes, *V, *res;
-
-    M = (typeM *)malloc(sizeof(typeM) * m * m);
-    V = (typeV *)malloc(sizeof(typeV) * m * VECTOR_COL_SIZE);
-    res = (typeV *)malloc(sizeof(typeV) * m * m);
-
-    if (m < thresholdMatrixSize)
+    for (int m = 256; m <= 8192; m += 256)
     {
-        isPrint = true;
-    }
-    else
-    {
-        isPrint = false;
-    }
+        bool isPrint = true;
+        const int thresholdMatrixSize = 16;
+        class Timer timer;
 
-    cudaMalloc((void **)&deviceM, sizeof(typeM) * m * m);
-    cudaMalloc((void **)&deviceV, sizeof(typeV) * m * VECTOR_COL_SIZE);
-    cudaMalloc((void **)&deviceRes, sizeof(typeV) * m * VECTOR_COL_SIZE);
+        typeM *deviceM, *M;
+        typeV *deviceV, *deviceRes, *V, *res;
 
-    create_matrix<typeM><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceM, m, m);
-    create_vector_for_cutlass<typeV><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceV, m, 1);
+        M = (typeM *)malloc(sizeof(typeM) * m * m);
+        V = (typeV *)malloc(sizeof(typeV) * m * m);
+        res = (typeV *)malloc(sizeof(typeV) * m * m);
 
-    cudaMemcpy(M, deviceM, sizeof(typeM) * m * m, cudaMemcpyDeviceToHost);
-    cudaMemcpy(V, deviceV, sizeof(typeV) * m * VECTOR_COL_SIZE, cudaMemcpyDeviceToHost);
+        if (m < thresholdMatrixSize)
+        {
+            isPrint = true;
+        }
+        else
+        {
+            isPrint = false;
+        }
 
-    if (isPrint)
-    {
-        print_matrix(m, m, M, m);
+        cudaMalloc((void **)&deviceM, sizeof(typeM) * m * m);
+        cudaMalloc((void **)&deviceV, sizeof(typeV) * m * m);
+        cudaMalloc((void **)&deviceRes, sizeof(typeV) * m * m);
+
+        create_matrix<typeM><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceM, m, m);
+        create_vector_for_cutlass<typeV><<<dim3((m + 16 - 1) / 16, (m + 16 - 1) / 16), dim3(16, 16)>>>(deviceV, m, m);
+
+        cudaMemcpy(M, deviceM, sizeof(typeM) * m * m, cudaMemcpyDeviceToHost);
+        cudaMemcpy(V, deviceV, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
+
+        if (isPrint)
+        {
+            print_matrix(m, m, M, m);
+            space();
+            print_matrix(m, m, V, m);
+        }
+
+        timer.reset();
+        mm_gpu<typeM, typeV>(m, m, m, 1.0f, deviceM, deviceV, 1.0f, deviceRes);
+        cudaDeviceSynchronize();
+        timer.stop();
         space();
-        print_vector<typeV>(m, V);
+        timer.print();
+        cout << m << endl;
+        space();
+
+        cudaMemcpy(res, deviceRes, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
+
+        if (isPrint)
+        {
+            space();
+
+            print_matrix(m, m, res, m);
+        }
+
+        cudaFree(deviceM);
+        cudaFree(deviceV);
+        cudaFree(deviceRes);
+        free(M);
+        free(V);
+        free(res);
     }
 
-    // timer.reset();
-    // mm_gpu<typeM, typeV>(m, m, m, 1.0f, deviceM, deviceV, 1.0f, deviceRes);
-    // cudaDeviceSynchronize();
-    // timer.stop();
-
-    // space();
-    // cout << "m : " << m << endl;
-    // timer.print();
-    // space();
-
-    // cudaMemcpy(res, deviceRes, sizeof(typeV) * m * m, cudaMemcpyDeviceToHost);
-
-    // if (isPrint)
-    // {
-    //     space();
-
-    //     print_matrix(m, m, res, m);
-    // }
     return 0;
 }

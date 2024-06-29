@@ -1,32 +1,28 @@
-CXXFLAGS=-g
-NVCCFLAGS=-g -G
+# コンパイラとフラグの設定
+CC=nvcc
+CFLAGS=--std c++17 --expt-relaxed-constexpr
+INCLUDES=-I/workspace/lib/include
+LIBS=-lcublas
+TARGET=a
 
-LDFLAGS =
+# ソースファイル (コマンドラインから指定)
+GEMV ?= gemv/main.cu
+CUBLAS ?= cublasGemv/main.cu
 
-SRCDIR=src
-CU_SRCS=$(shell find $(SRCDIR) -name '*.cu')
-OBJS=$(CU_SRCS)
-CPP_SRCS=$(shell find $(SRCDIR) -name '*.cpp')
-OBJS+=$(CPP_SRCS)
-OBJS:=$(subst .cpp,.o,$(OBJS))
-OBJS:=$(subst .cu,.o,$(OBJS))
-TARGET=main
+# ターゲットファイル
 
-.SUFFIXES: .o
+.PHONY: gemv
+gemv:
+	$(CC) $(CFLAGS) $(INCLUDES) $(LIBS) -o $(TARGET) $(GEMV)
+	./$(TARGET)
+	$(MAKE) clean
 
-.PHONY: all
-all:$(TARGET)
+.PHONY: cublas
+cublas:
+	$(CC) $(CFLAGS) $(INCLUDES) $(LIBS) -o $(TARGET) $(CUBLAS)
+	./$(TARGET)
+	$(MAKE) clean
 
-$(TARGET): $(OBJS)
-	nvcc $(LDFLAGS) $(OBJS) -o $@
-
-%.o: %.cpp
-	nvcc -c $(CXXFLAGS) $< -o $@
-
-%.o: %.cu
-	nvcc -c $(NVCCFLAGS) $< -o $@ 
-
-
-.PHONY: clean
+# クリーンアップルール
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(TARGET)
