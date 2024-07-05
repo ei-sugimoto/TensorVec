@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/cutlass/include/**",
+                "${workspaceFolder}/cutlass/include/**"
             ],
             "defines": [
                 "_DEBUG",
