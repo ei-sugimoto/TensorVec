@@ -26,3 +26,8 @@ cublas:
 # クリーンアップルール
 clean:
 	rm -f $(TARGET)
+
+.PHONY: all
+all:
+	$(MAKE) gemv
+	$(MAKE) cublas
